@@ -6,8 +6,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <math.h>
-#include <chrono>
-#include <thread>
+#include <unistd.h>
 using namespace std;
 #pragma endregion
 
@@ -39,8 +38,8 @@ using namespace std;
 #pragma region Conditions
 // Conditions:
     // 1. An alone cell dies
-    // 2. From horizontal position to vertical one and otherwise
-    // 3. From a diagonal cross to a cross
+    // 2. From - to |
+    // 3. From a X to a †
 #pragma endregion
 
 //-----------------------------------------------------------------------//
@@ -76,7 +75,7 @@ void conditions(const int x, const int y){
 }
 
 void condition1(const int x, const int y) {
-    bool condition1 =1;
+    bool condition1=1;
     for(int i=x-1; i<=x+1; i++){
         for(int k=y-1; k<=y+1; k++){
 	        if(x == i and y == k) continue;
@@ -121,7 +120,7 @@ void condition3(const int x, const int y) {
         bool vert=true;
         int i=x-1;
         int k=y-1;
-        while (i<=x+1 and (diag or vert)) {
+        /*while (i<=x+1 and (diag or vert)) {
             k=y-1;
             while (k<=y+1 and (diag or vert)) {
                 //diagonal corners
@@ -140,7 +139,38 @@ void condition3(const int x, const int y) {
                 ++k;
             }
             ++i;
-        } 
+        } */
+
+
+        while (i<=x+1 and diag) {
+            k=y-1;
+            while (k<=y+1 and diag) {
+                //X
+                if ((i-k)%2==0) {
+                    diag=mesh[i][k]==FILL;
+                }
+                ++k;
+            }
+            ++i;
+        }
+        i=x-1;
+        while (i<=x+1 and vert) {
+            k=y-1;
+            while (k<=y+1 and vert) {
+                //†
+                if ((i-k)%2!=0) {
+                    vert=mesh[i][k]==FILL;
+                }
+                ++k;
+            }
+            ++i;
+        }
+
+        if (diag and vert) {
+           diag=0;
+           vert=0;
+        }    
+
         if (diag) {
            for (i=x-1; i<=x+1; ++i) {
                for (k=y-1; k<=y+1; ++k) {
@@ -178,7 +208,7 @@ void run_time(){
 void create_life(){
     
     for(int i=0; i<ITERATIONS; i++){
-        this_thread::sleep_for (chrono::seconds(1));
+        sleep (1);
         reload_frame(abs(ITERATIONS - i));
         run_time();
     } 
